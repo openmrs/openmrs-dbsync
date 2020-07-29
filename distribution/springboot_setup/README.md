@@ -16,19 +16,27 @@ docker-compose up
 ```
 
 ### 2. Import database dumps
-Restore a database archive for each database:
+Restore a database archive for each database by running the approriate command depending on your operating system:
 
 
 - a dump with not much data for the central database
 ```
 cd distribution/springboot_setup/db
+#Command used on Linux
 zcat dump_receiver.zip | docker exec -i db_db_central_1 /usr/bin/mysql -u root --password=root openmrs
+
+#Command used on MacOS
+#unzip -p dump_receiver.zip | docker exec -i db_db_central_1 /usr/bin/mysql -u root --password=root openmrs
 ```
 
 - a dump with lots of data for the remote database.
 ```
+#Command used on Linux
 cd distribution/springboot_setup/db
 zcat dump_sender_2.3.zip | docker exec -i db_db_remote_1 /usr/bin/mysql -u root --password=root openmrs
+
+#Command used on MacOS
+#unzip -p dump_sender_2.3.zip | docker exec -i db_db_remote_1 /usr/bin/mysql -u root --password=root openmrs
 ```
 
 This operation will take few minutes.
