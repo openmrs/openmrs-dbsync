@@ -20,24 +20,31 @@ Restore a database archive for each database by running the approriate command d
 
 
 - a dump with not much data for the central database
+
+<sub>Linux</sub>
 ```
 cd distribution/springboot_setup/db
-#Command used on Linux
 zcat dump_receiver.zip | docker exec -i db_db_central_1 /usr/bin/mysql -u root --password=root openmrs
-
-#Command used on MacOS
-#unzip -p dump_receiver.zip | docker exec -i db_db_central_1 /usr/bin/mysql -u root --password=root openmrs
+```
+<sub>macOS</sub>
+```
+cd distribution/springboot_setup/db
+unzip -p dump_receiver.zip | docker exec -i db_db_central_1 /usr/bin/mysql -u root --password=root openmrs
 ```
 
 - a dump with lots of data for the remote database.
+
+<sub>Linux</sub>
 ```
-#Command used on Linux
 cd distribution/springboot_setup/db
 zcat dump_sender_2.3.zip | docker exec -i db_db_remote_1 /usr/bin/mysql -u root --password=root openmrs
-
-#Command used on MacOS
-#unzip -p dump_sender_2.3.zip | docker exec -i db_db_remote_1 /usr/bin/mysql -u root --password=root openmrs
 ```
+<sub>macOS</sub>
+```
+cd distribution/springboot_setup/db
+unzip -p dump_sender_2.3.zip | docker exec -i db_db_remote_1 /usr/bin/mysql -u root --password=root openmrs
+```
+
 
 This operation will take few minutes.
 
