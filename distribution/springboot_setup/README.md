@@ -132,13 +132,29 @@ The property for that purpose is:
 camel.output.endpoint.complex.obs.data.directory=/tmp/openmrs-dbsync/store
 ```
 
-### 5. Rebuild the project
+Note: To disable this feature, just delete the route, or rename it to **directory-sync-route.xml.disable**
+
+### 5. Rebuilding reciever's openmrs databse search index
+To configure rebuiding of the receiver's database search index when entities such as patient are synced, set the following properties appropriately.
+
+```
+# Base Url of a running openmrs reciever's instance whose databse search index will be triggered for a rebuild
+# By default, this will refer to the openmrs demo site.
+openmrs.baseUr=https://demo.openmrs.org/openmrs
+# User name to openmrs instance
+openmrs.username=admin
+# Password for user
+openmrs.password=Admin123
+```
+Note: The default vaules used are for test purposes.
+
+### 6. Rebuild the project
 
 ```
 mvn clean install
 ```
 
-### 6. Launch the Spring Boot apps
+### 7. Launch the Spring Boot apps
 Each application will be launched with the appropriate Spring Boot profile parameter. The values are `sender` or `receiver`. The profile will also select the right `application.properties` file.
 - sender app:
  ```
