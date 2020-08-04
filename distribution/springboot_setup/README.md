@@ -135,10 +135,10 @@ camel.output.endpoint.complex.obs.data.directory=/tmp/openmrs-dbsync/store
 Note: To disable this feature, just delete the route, or rename it to **directory-sync-route.xml.disable**
 
 ### 5. Rebuilding reciever's openmrs databse search index
-To configure rebuiding of the receiver's database search index when entities such as patient are synced, set the following properties appropriately.
+To configure rebuilding the receiver's database search index when entities such as patient are synced, set the following properties appropriately:
 
 ```
-# Base Url of a running openmrs reciever's instance whose databse search index will be triggered for a rebuild
+# Base URL of a running OpenMRS receiver's instance whose databse search index will be triggered for a rebuild
 # By default, this will refer to the openmrs demo site.
 openmrs.baseUr=https://demo.openmrs.org/openmrs
 # User name to openmrs instance
