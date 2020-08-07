@@ -5,6 +5,7 @@ import org.apache.camel.builder.DeadLetterChannelBuilder;
 import org.apache.camel.builder.NoErrorHandlerBuilder;
 import org.apache.camel.processor.idempotent.jpa.JpaMessageIdRepository;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openmrs.eip.app.management.init.impl.ManagementDbInitImpl;
 import org.openmrs.eip.component.SyncProfiles;
@@ -25,6 +26,7 @@ import javax.persistence.EntityManagerFactory;
 import java.security.Security;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -130,11 +132,33 @@ public class SyncApplication {
 
             tables.add(dbName + "." + tableToSyncEnum.name());
         }
+        String tableWhitelist = StringUtils.join(tables, ",");
+        Map<String, Object> props = new HashMap<String, Object>();
+        props.put("debezium.tablesToSync", tableWhitelist);
 
-        Map<String, Object> props = Collections.singletonMap("debezium.tablesToSync", StringUtils.join(tables, ","));
+        // Interpolate the debezium-mysql:extract parameters for better legibility
+        String debeziumParameters = "databaseServerId={{debezium.db.serverId}}"
+                                + "&databaseServerName={{debezium.db.serverName}}"
+                                + "&databaseHostname={{openmrs.db.host}}"
+                                + "&databasePort={{openmrs.db.port}}"
+                                + "&databaseUser={{debezium.db.user}}"
+                                + "&databasePassword={{debezium.db.password}}"
+                                + "&databaseWhitelist={{openmrs.db.name}}"
+                                + "&offsetStorageFileName={{debezium.offsetFilename}}"
+                                + "&databaseHistoryFileFilename={{debezium.historyFilename}}"
+                                + "&tableWhitelist=" + tableWhitelist
+                                + "&offsetFlushIntervalMs=0"
+                                + "&snapshotMode=initial"
+                                + "&snapshotFetchSize=1000"
+                                + "&snapshotLockingMode=extended"
+                                + "&includeSchemaChanges=false";
+        Map<String, Object> propertiesMap = env.getSystemProperties(); 
+        StringSubstitutor.replace(debeziumParameters, propertiesMap, "{{", "}}");
+        props.put("debezium.parameters", debeziumParameters);
+        
         PropertySource customPropSource = new MapPropertySource("custom", props);
         env.getPropertySources().addLast(customPropSource);
-
+        
         return customPropSource;
     }
 
