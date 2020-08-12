@@ -1,0 +1,41 @@
+<routes xmlns="http://camel.apache.org/schema/spring">
+    <route id="out-bound-lims" errorHandlerRef="deadLetterChannelBuilder">
+        <from uri="direct:out-bound-lims"/>
+        <log message="Processing db event: ${body}" />
+
+        <unmarshal>
+            <json library="Jackson" unmarshalTypeName="org.openmrs.eip.component.entity.DbEvent" />
+        </unmarshal>
+        <choice>
+            <when>
+                <jsonpath>
+                    $.[?(@.entityTableName=='test_order') ]
+                </jsonpath>
+                <setProperty name="lab-order-uuid">
+                    <simple>${body.entityId}</simple>
+                </setProperty>                
+                <setBody>
+                    <simple>{{openmrs.username}}:{{openmrs.password}}</simple>
+                </setBody>
+                <marshal>
+                    <base64/>
+                </marshal>
+                <convertBodyTo type="java.lang.String"/>
+                <setHeader name="Authorization">
+                    <simple>Basic ${body}</simple>
+                </setHeader>
+                <setHeader name="CamelHttpMethod">
+                    <constant>GET</constant>
+                </setHeader>
+                <!--retreiving service request from openmrs fhir-->
+                <toD uri="{{openmrs.baseUrl}}/ws/fhir2/R4/ServiceRequest/${exchangeProperty.lab-order-uuid}"/>
+
+                <convertBodyTo type="java.lang.String"/>
+                <log message="Received service request: ${body}"/>
+
+                <!--To create route to OpenELIS-->
+                <toD uri="file:{{camel.output.endpoint.file.location}}/docs?noop=true&amp;recursive=true&amp;idempotentKey=${file:name}-${file:modified}&amp;idempotentRepository=#fileSyncIdempotentRepository"/>
+            </when>
+        </choice>
+    </route>
+</routes>
