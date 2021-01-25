@@ -69,7 +69,7 @@ public final class JsonUtils {
      * @param key key parameter whose values will be concatenated 
      * @return concatenated values for key of json array elements
      */
-    public static String concvertToValuesArrayForKey(final String jsonArray, final String key) {
+    public static String convertToValuesArrayForKey(final String jsonArray, final String key) {
     	if (jsonArray == null || jsonArray.isEmpty()) {
     		return "";
     	}
@@ -80,9 +80,9 @@ public final class JsonUtils {
     }
     
     /**
-     * Utility method to determine if jsonArray contains Item with key whose value matches value
+     * Utility method to determine if jsonArray contains item with matching key value pair
      * @param jsonArray json array string
-     * @param key key parameter whose value will be compared 
+     * @param key key parameter whose value will used for comparison 
      * @param value value to be compared with
      * @return true/false
      */
@@ -99,7 +99,7 @@ public final class JsonUtils {
     }
     
     /**
-     * Utility method to return value for property for contained array item
+     * Utility method to return item's property's value given the provided array contains the item
      * @param jsonArray json array string
      * @param propertyName property name whose value will be returned
      * @param key key parameter whose value will be compared 

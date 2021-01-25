@@ -79,13 +79,13 @@ public class JsonUtilsTest {
     }
 
     @Test
-    public void concvertToValuesArrayForKey() {
+    public void convertToValuesArrayForKey_shouldConvertToValuesArrayForKey() {
         // Given
         String json = jsonArray();
         String expectedString = "\"4686a8ca56534ae1a1b330c6c0489f3e\",\"5a692788c4b443b4af9a68ee5a9fa7a0\",\"07e3306dc3f2409eacd725dfd91f6d74\",\"a2f37ae28c6b45c8b747d3a29c718cca\",\"fceb8a504e194f098c595979ace926e8\",\"14a74625b1bb4f9fbd37b8d3d710ae23\",\"387bad978eeb4f6cb1c5d368b4bae291\",\"cd441ba2c2454b6cb79a8ac64ba2de3e\",\"da0a2ad524844b21b7ed03e63d68bc37\",\"8418cace20e34a8fa6f2852bdaa1d012\",\"fe056ad2295d48288c06ce43713f351c\"";
 
         // When
-        String concatenatedValuesString = JsonUtils.concvertToValuesArrayForKey(json, "service_uid");
+        String concatenatedValuesString = JsonUtils.convertToValuesArrayForKey(json, "service_uid");
 
         // Then
         assertEquals(expectedString, concatenatedValuesString);
@@ -93,7 +93,7 @@ public class JsonUtilsTest {
     
     @Test
     public void containsItemWithKeyEqualsValue() {
-        // Given
+    	// Given
     	String json = jsonArray();
     	Boolean expectedValue = true;
     	
