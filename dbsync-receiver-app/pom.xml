@@ -36,7 +36,6 @@
                     <!-- will generate 2 jars:  -->
                     <!-- the normal jar usable as a dependency-->
                     <!-- an executable jar with the classifier exe-->
-                    <attach>true</attach>     
                     <classifier>exe</classifier>
                 </configuration>
                 <executions>
