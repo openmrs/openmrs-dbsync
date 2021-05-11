@@ -113,7 +113,7 @@ properties that take directory paths as values e.g. log file, complex obs data d
 
 ### Receiver 
 1. Create an installation directory for your receiver app.
-2. Copy to the working directory the `dbsync-receiver-app-{VERSION}.jar` file that was generated when you built OpenMRS
+2. Copy to the working directory the `dbsync-receiver-app-{VERSION}-exe.jar` file that was generated when you built OpenMRS
    EIP above, this file should be located in the `dbsync-receiver-app/target` folder.
 3. There is an application.properties file in the `dbsync-receiver-app/configuration` directory relative to the root of 
    the OpenMR EIP project, copy it to your installation directory.
@@ -127,7 +127,7 @@ properties that take directory paths as values e.g. log file, complex obs data d
    installation directory.
 6. Launch the receiver app by navigating to its installation directory from the terminal and run the command below.
 ```shell
-java -jar dbsync-receiver-app-{VERSION}.jar
+java -jar dbsync-receiver-app-{VERSION}-exe.jar
 ```
 Make sure no errors are reported when the application starts, you can find the logs in the configured directory which
 defaults to `{eip.home}/logs/openmrs-eip.log`, where {eip.home} is the path to your installation directory.
@@ -153,7 +153,7 @@ defaults to `{eip.home}/logs/openmrs-eip.log`, where {eip.home} is the path to y
 
 3. #### Installing the Sender Application
     1. Create an installation directory for your sender app.
-    2. Copy to the working directory the `dbsync-sender-app-{VERSION}.jar` file that was generated when you built OpenMRS
+    2. Copy to the working directory the `dbsync-sender-app-{VERSION}-exe.jar` file that was generated when you built OpenMRS
        EIP above, this file should be located in the `dbsync-sender-app/target` folder.
     3. There is an application.properties file in the `dbsync-sender-app/configuration` directory relative to the root 
        of the OpenMR EIP project, copy it to your installation directory.
@@ -163,7 +163,7 @@ defaults to `{eip.home}/logs/openmrs-eip.log`, where {eip.home} is the path to y
        your installation directory.
     6. Launch the sender app by navigating to its installation directory from the terminal and run the command below.
     ```shell
-    java -jar dbsync-sender-app-{VERSION}.jar
+    java -jar dbsync-sender-app-{VERSION}-exe.jar
     ```
 Make sure no errors are reported when the application starts, you can find the logs in the configured directory which
 defaults to `{eip.home}/logs/openmrs-eip.log`, where {eip.home} is the path to your installation directory.
