@@ -1,116 +1,85 @@
 <routes xmlns="http://camel.apache.org/schema/spring">
 
     <route id="out-bound-db-sync" errorHandlerRef="noErrorHandler">
-        <from uri="scheduler:retry?initialDelay=1000&amp;delay=10000" />
+        <from uri="direct:out-bound-db-sync" />
 
-		<log message="Fetching events in the staging table" loggingLevel="DEBUG" />
-        
         <log message="Start db-sync-route: ${body}" loggingLevel="DEBUG" />
-
-        <toD uri="jpa:DebeziumEvent?query=SELECT dE.id FROM DebeziumEvent dE ORDER BY event_time_stamp ASC, dE.id ASC" />
 
         <choice>
             <when>
-                <simple>${body.size()} > 0</simple>
-                <log message="Event count in the stating area: ${body.size()}" />
+                <simple>${exchangeProperty.event.operation} == 'd'</simple>
+                <setBody>
+                    <spel>#{new org.openmrs.eip.component.model.SyncModel()}</spel>
+                </setBody>
+                <script>
+                    <spel>
+                        #{body.setTableToSyncModelClass(T(org.openmrs.eip.component.service.TableToSyncEnum).getTableToSyncEnum(getProperty('event').tableName).modelClass)}
+                        #{body.setModel(body.tableToSyncModelClass.getConstructor().newInstance())}
+                        #{body.model.setUuid(getProperty('event').identifier)}
+                        #{body.setMetadata(new org.openmrs.eip.component.model.SyncMetadata())}
+                    </spel>
+                </script>
 
-                <split parallelProcessing="false">
-                    <simple>${body}</simple>
-                    <setProperty name="event-item-id">
-                        <simple>${body}</simple>
-                    </setProperty>
-                    <log message="Loading event item with id: ${body}" />
-
-                    <toD uri="jpa:DebeziumEvent?query=SELECT dE FROM DebeziumEvent dE WHERE dE.id = ${body}" />
-
-                    <setProperty name="event-item">
-                        <simple>${body[0]}</simple>
-                    </setProperty>
-                    
-                    <log message="Processing event Item" />
-                
-                   <choice>
-			            <when>
-			                <simple>${event-item.operation} == 'd'</simple>
-			                <setBody>
-			                    <spel>#{new org.openmrs.eip.component.model.SyncModel()}</spel>
-			                </setBody>
-			                <script>
-			                    <spel>
-			                        #{body.setTableToSyncModelClass(T(org.openmrs.eip.component.service.TableToSyncEnum).getTableToSyncEnum(getProperty('event-item').tableName).modelClass)}
-			                        #{body.setModel(body.tableToSyncModelClass.getConstructor().newInstance())}
-			                        #{body.model.setUuid(getProperty('event-item').identifier)}
-			                        #{body.setMetadata(new org.openmrs.eip.component.model.SyncMetadata())}
-			                    </spel>
-			                </script>
-			
-			                <log message="Deleted entity payload -> ${body}" />
-			            </when>
-			            <otherwise>
-			                <log message="Loading entity from DB..." loggingLevel="DEBUG" />
-							
-							<!--  Here I think we should extract from the  event-item.before_state -->
-							<!--??   -->
-			                <toD uri="openmrs:extract?tableToSync=${event-item.tableName.toUpperCase()}&amp;uuid=${event-item.identifier}" />
-			
-			                <choice>
-			                    <when>
-			                        <simple>${body.size()} == 1</simple>
-			                        <setBody>
-			                            <jsonpath>$[0]</jsonpath>
-			                        </setBody>
-			                    </when>
-			                    <otherwise>
-			                        <setBody>
-			                            <simple>${null}</simple>
-			                        </setBody>
-			                    </otherwise>
-			                </choice>
-			            </otherwise>
-			        </choice>
-			
-			        <choice>
-			            <when>
-			                <simple>${body} != null</simple>
-			                <script>
-			                    <spel>
-			                        #{body.metadata.setSourceIdentifier('{{db-sync.senderId}}')}
-			                        #{body.metadata.setDateSent(T(java.time.LocalDateTime).now())}
-			                        #{body.metadata.setOperation(getProperty('event').operation)}
-			                    </spel>
-			                </script>
-			                <setBody>
-			                    <method beanType="org.openmrs.eip.component.utils.JsonUtils" method="marshall(${body})" />
-			                </setBody>
-			
-			                <log message="Sync data -> ${body}" />
-			
-			                <when>
-			                    <simple>{{openmrs.eip.dbsync.encryption.enabled}} == true</simple>
-			                    <log message="Encrypting entity payload.." />
-			                    
-			                    <process ref="pgpEncryptService" />
-			
-			                    <log message="Encrypted entity payload -> ${body}" loggingLevel="TRACE" />
-			                </when>
-			                
-			                <log message="Pushing entity to sync destination: {{camel.output.endpoint}}" />
-			
-			                <toD uri="{{camel.output.endpoint}}" />
-			            </when>
-			            <otherwise>
-			                <!-- TODO Log to a special failures log file or DB -->
-			                <log message="No entity found in the database matching identifier: ${exchangeProperty.event.identifier}" loggingLevel="ERROR" />
-			            </otherwise>
-			        </choice>
-			
-			        <log message="End db-sync-route" loggingLevel="DEBUG" />
-                </split>
+                <log message="Deleted entity payload -> ${body}" />
             </when>
             <otherwise>
-                <log message="No events found in staging table" loggingLevel="DEBUG" />
+                <log message="Loading entity from DB..." loggingLevel="DEBUG" />
+
+                <toD uri="openmrs:extract?tableToSync=${exchangeProperty.event.tableName.toUpperCase()}&amp;uuid=${exchangeProperty.event.identifier}" />
+
+                <choice>
+                    <when>
+                        <simple>${body.size()} == 1</simple>
+                        <setBody>
+                            <jsonpath>$[0]</jsonpath>
+                        </setBody>
+                    </when>
+                    <otherwise>
+                        <setBody>
+                            <simple>${null}</simple>
+                        </setBody>
+                    </otherwise>
+                </choice>
             </otherwise>
         </choice>
+
+        <choice>
+            <when>
+                <simple>${body} != null</simple>
+                <script>
+                    <spel>
+                        #{body.metadata.setSourceIdentifier('{{db-sync.senderId}}')}
+                        #{body.metadata.setDateSent(T(java.time.LocalDateTime).now())}
+                        #{body.metadata.setOperation(getProperty('event').operation)}
+                    </spel>
+                </script>
+                <setBody>
+                    <method beanType="org.openmrs.eip.component.utils.JsonUtils" method="marshall(${body})" />
+                </setBody>
+
+                <log message="Sync data -> ${body}" />
+
+                <when>
+                    <simple>{{openmrs.eip.dbsync.encryption.enabled}} == true</simple>
+                    <log message="Encrypting entity payload.." />
+                    
+                    <process ref="pgpEncryptService" />
+
+                    <log message="Encrypted entity payload -> ${body}" loggingLevel="TRACE" />
+                </when>
+                
+                <log message="Pushing entity to sync destination: {{camel.output.endpoint}}" />
+
+                <toD uri="{{camel.output.endpoint}}" />
+            </when>
+            <otherwise>
+                <!-- TODO Log to a special failures log file or DB -->
+                <log message="No entity found in the database matching identifier: ${exchangeProperty.event.identifier}" loggingLevel="ERROR" />
+            </otherwise>
+        </choice>
+
+        <log message="End db-sync-route" loggingLevel="DEBUG" />
+
     </route>
 
 </routes>

@@ -5,6 +5,7 @@ data/
 log/
 #Ignore all application.properties file that might contain data from local device
 app/src/main/resources/**/application*.properties
+distribution/sender/old_routes/
 
 .project
 .settings/
